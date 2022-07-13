@@ -29,6 +29,7 @@ const rateLimitTimeout = 3600/4900;
 
 for(let i = 1; i <= issueCount; i++) {
   try {
+    // TODO: fetch comments, timeline and diff/patch data
     const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues/${i}`);
     await issuesCollection.insertOne(data);
     await sleep(rateLimitTimeout * 1000);
