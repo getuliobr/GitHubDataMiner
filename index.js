@@ -27,7 +27,7 @@ const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
 const { number: issueCount } = data[0];
 
 // TODO: calculate rate limit if unauthenticated
-// 4900 just to make sure it will fit in rate limit
+// 1225 (4900 requests) just to make sure it will fit in rate limit
 const rateLimitTimeout = 3600/1225;
 
 for(let i = 1; i <= issueCount; i++) {
