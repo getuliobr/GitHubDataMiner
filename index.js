@@ -2,6 +2,9 @@ import dotenv from "dotenv";
 import api from './api.js';
 import { MongoHelper } from './db/db.js'
 
+// https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep?page=1&tab=scoredesc#tab-top
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 dotenv.config();
 const { MONGOURI, REPO_OWNER, REPO_NAME } = process.env;
 
@@ -12,31 +15,26 @@ try {
 }
 
 const issuesCollection = MongoHelper.getCollection('issues')
-const params = {
-  'q': `repo:${REPO_OWNER}/${REPO_NAME}`,
-  'per_page': 100,
-  'page': 1,
-}
 
-const { data } = await api.get('/search/issues', { params });
-const { total_count: totalCount, items } = data;
+const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
+  'sort': 'created',
+  'direction': 'desc',
+});
 
-const pageCount = Math.ceil(totalCount/100);
-const promiseArr = [issuesCollection.insertMany(items)];
+const { number: issueCount } = data[0];
 
-for(let i = 2; i <= pageCount; i++) {
-  params.page = i;
+// TODO: calculate rate limit if unauthenticated
+// 4900 just to make sure it will fit in rate limit
+const rateLimitTimeout = 3600/4900;
 
-  const { data } = await api.get('/search/issues', { params });
-  const { total_count, items } = data;
-
-  const promiseArr = [issuesCollection.insertMany(items)];
-}
-
-try {
-  await Promise.all(promiseArr);
-} catch (error) {
-  console.error("err:", error);
+for(let i = 1; i <= issueCount; i++) {
+  try {
+    const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues/${i}`);
+    await issuesCollection.insertOne(data);
+    await sleep(rateLimitTimeout * 1000);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 MongoHelper.disconnect();
