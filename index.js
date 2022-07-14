@@ -38,13 +38,13 @@ for(let i = 1; i <= issueCount; i++) {
     await issuesCollection.insertOne(data);
 
     const { data: comments_data } = await api.get(comments_url);
-    await commentsCollection.insertOne( { issue_id, comments_data });
+    await commentsCollection.insertOne({ issue_id, comments_data });
     
     const { data: events_data } = await api.get(events_url);
-    await eventsCollection.insertOne( { issue_id, events_data });
+    await eventsCollection.insertOne({ issue_id, events_data });
         
     const { data: timeline_data } = await api.get(timeline_url);
-    await timelineCollection.insertOne( { issue_id, timeline_data });
+    await timelineCollection.insertOne({ issue_id, timeline_data });
 
     await sleep(rateLimitTimeout * 1000);
   } catch (error) {
