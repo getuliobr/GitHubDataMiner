@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { MongoHelper } from './db.js'
 
 // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep?page=1&tab=scoredesc#tab-top
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = s => new Promise(r => setTimeout(r, s * 1000));
 
 dotenv.config();
 const { MONGO_URI, REPO_OWNER, REPO_NAME, FETCH_PATCH } = process.env;
@@ -28,46 +28,70 @@ const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
 
 const { number: issueCount } = data[0];
 
+console.log(`Total issue count: ${issueCount}`);
+
 // TODO: calculate rate limit if unauthenticated
 // 5000 actual rate limit, 4900 just to make sure it works
 
 const rateLimitPerRequestTimeout = 3600/4900;
 
 for(let i = 1; i <= issueCount; i++) {
+  console.log(`Fetching issue ${i} from ${REPO_OWNER}/${REPO_NAME}`);
   try {
-    console.log(`Fetching issue ${i} from ${REPO_OWNER}/${REPO_NAME}`);
-
+    await sleep(rateLimitPerRequestTimeout);
     const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues/${i}`);
     const { id: issue_id, comments_url, events_url, timeline_url, pull_request } = data;
     await issuesCollection.insertOne({ issue_id, 'issue_data': data });
+  
+    try {
+      await sleep(rateLimitPerRequestTimeout);
+      const { data: comments_data } = await api.get(comments_url);
+      await commentsCollection.insertOne({ issue_id, comments_data });
+    } catch (error) {
+      console.error(`Got an error while fetching issue comments ${i}, message: ${error.message}`);
+    }
 
-    const { data: comments_data } = await api.get(comments_url);
-    await commentsCollection.insertOne({ issue_id, comments_data });
+    try {
+      await sleep(rateLimitPerRequestTimeout);
+      const { data: events_data } = await api.get(events_url);
+      await eventsCollection.insertOne({ issue_id, events_data });
+    } catch (error) {
+      console.error(`Got an error while fetching issue events ${i}, message: ${error.message}`);
+    }
     
-    const { data: events_data } = await api.get(events_url);
-    await eventsCollection.insertOne({ issue_id, events_data });
-        
-    const { data: timeline_data } = await api.get(timeline_url);
-    await timelineCollection.insertOne({ issue_id, timeline_data });
-
-    await sleep(4 * rateLimitPerRequestTimeout);
+    try {
+      await sleep(rateLimitPerRequestTimeout);
+      const { data: timeline_data } = await api.get(timeline_url);
+      await timelineCollection.insertOne({ issue_id, timeline_data });
+    } catch (error) {
+      console.error(`Got an error while fetching issue timeline ${i}, message: ${error.message}`);
+    }
 
     if(!pull_request) continue;
 
     const { url: pull_url, patch_url } = pull_request;
 
-    const { data: pr_data } = await api.get(pull_url);
-    await pullCollection.insertOne({ issue_id, pr_data });
-
-    if(FETCH_PATCH === 'true') {
-      const { data: patch_data } = await api.get(patch_url);
-
-      await fs.writeFile(`./patch/${issue_id}.patch`, patch_data, { flag: 'w+' });
+    try {
+      await sleep(rateLimitPerRequestTimeout);
+      const { data: pr_data } = await api.get(pull_url);
+      await pullCollection.insertOne({ issue_id, pr_data });
+    } catch (error) {
+      console.error(`Got an error while fetching pull request ${i}, message: ${error.message}`);
     }
 
-    await sleep(rateLimitPerRequestTimeout);
+    if(FETCH_PATCH !== 'true') continue;
+
+    try {
+      await sleep(rateLimitPerRequestTimeout);
+      const { data: patch_data } = await api.get(patch_url);
+      await fs.writeFile(`./patch/${issue_id}.patch`, patch_data, { flag: 'w+' });
+    } catch (error) {
+      console.error(`Got an error while fetching pull request ${i} patch, message: ${error.message}`);
+    }
   } catch (error) {
     console.error(`Got an error while fetching issue ${i}, message: ${error.message}`);
+    console.error(error);
+    continue;
   }
 }
 
