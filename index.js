@@ -1,5 +1,6 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import api from './api.js';
+import fs from 'fs/promises';
 import { MongoHelper } from './db/db.js'
 
 // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep?page=1&tab=scoredesc#tab-top
@@ -18,7 +19,6 @@ const issuesCollection = MongoHelper.getCollection('issues');
 const commentsCollection = MongoHelper.getCollection('comments');
 const eventsCollection = MongoHelper.getCollection('events');
 const timelineCollection = MongoHelper.getCollection('timeline');
-const patchCollection = MongoHelper.getCollection('patch');
 const pullCollection = MongoHelper.getCollection('pullrequest');
 
 const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
@@ -61,7 +61,8 @@ for(let i = 1; i <= issueCount; i++) {
 
     if(FETCH_PATCH === 'true') {
       const { data: patch_data } = await api.get(patch_url);
-      await patchCollection.insertOne({ issue_id, patch_data });
+
+      await fs.writeFile(`./patch/${issue_id}.patch`, patch_data, { flag: 'w+' });
     }
 
     await sleep(rateLimitPerRequestTimeout);
