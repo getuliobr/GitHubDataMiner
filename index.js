@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import api from './api.js';
 import fs from 'fs/promises';
-import { MongoHelper } from './db/db.js'
+import { MongoHelper } from './db.js'
 
 // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep?page=1&tab=scoredesc#tab-top
 const sleep = ms => new Promise(r => setTimeout(r, ms));
