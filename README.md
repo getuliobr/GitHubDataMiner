@@ -2,7 +2,7 @@
 
 ## Instalação e Execução
 
-Eu rodei o projeto na versão 16.15.0 do node e 8.5.5 do npm e instalei o MongoDB pelo docker mas também consegui rodar no download normal do [Mongo](https://www.mongodb.com/try/download/community), se rodar a versão baixada no site do mongo não precisa criar o usuário de admin e se não mudou as configurações do mongo a string do URI de exemplo já está certa.
+Eu rodei o projeto na versão 16.15.0 do node e 8.5.5 do npm e instalei o MongoDB pelo docker, também consegui rodar no download normal do [Mongo](https://www.mongodb.com/try/download/community), se rodar a versão baixada no site do mongo não precisa criar o usuário de admin e se não mudou as configurações do mongo a string do URI de exemplo já está certa.
 
 Para rodar o projeto clone o repositorio e depois acesse ele e instale as bibliotecas com o seguinte comando
 ```
