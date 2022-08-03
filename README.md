@@ -10,7 +10,7 @@ Crie o arquivo .env com os seus dados seguindo o exemplo do .env.example
 
 O token do github você gera [aqui](https://github.com/settings/tokens), eu acredito que não precisa marcar nenhuma permissão para rodar em projeto público, mas se for projeto privado talvez tenha que escolher alguma opção.
 
-Depois para rodar eu recomendo rodar salvando a saída em algum arquivo de texto, da seguinte forma:
+Eu recomendo rodar salvando a saída em algum arquivo de texto, execute o script da seguinte forma:
 ```
 node . >> log.txt
 ```
