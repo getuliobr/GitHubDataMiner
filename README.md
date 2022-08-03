@@ -1,4 +1,4 @@
-# GitHubDataMiner
+# GitHub Data Miner
 
 ## Instalação e Execução
 
