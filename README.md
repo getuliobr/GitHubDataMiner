@@ -4,7 +4,7 @@
 
 Eu rodei o projeto na versão 16.15.0 do node e 8.5.5 do npm e instalei o MongoDB pelo docker mas também consegui rodar no download normal do [Mongo](https://www.mongodb.com/try/download/community), se rodar a versão baixada no site do mongo não precisa criar o usuário de admin e se não mudou as configurações do mongo a string do URI de exemplo já está certa.
 
-Para rodar o projeto clone o repositorio e depois acesse ele e rode o seguinte comando
+Para rodar o projeto clone o repositorio e depois acesse ele e instale as bibliotecas com o seguinte comando
 ```
 npm install
 ```
@@ -16,6 +16,12 @@ Eu recomendo rodar salvando a saída em algum arquivo de texto, execute o script
 ```
 node . >> log.txt
 ```
+
+Se preferir não salvar em um arquivo de log e só deixar a saida no terminal, rode o script com:
+```
+node .
+```
+
 ## Erros
 
 Se der algum erro (menos o erro 404, esse significa que a issue foi deletada) quando tiver buscando alguma issue você vai ter que fazer algumas modificações no código para pegar só o que deu erro, para isso comente as linhas do codigo do que você já conseguiu buscar dos dados, ou seja, essas linhas que salvam no banco de dados:
