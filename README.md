@@ -1,6 +1,6 @@
 # GitHubDataMiner
 
-Eu rodei o projeto na versão 16.15.0 do node e 8.5.5 do npm e instalei o MongoDB pelo docker mas também consegui rodar no download normal do [Mongo](https://www.mongodb.com/try/download/community), se rodar a versão baixada no site do mongo não precisa criar o usuário de admin e se não mudou as configurações do mongo a string do URI de exemplo também tá certa.
+Eu rodei o projeto na versão 16.15.0 do node e 8.5.5 do npm e instalei o MongoDB pelo docker mas também consegui rodar no download normal do [Mongo](https://www.mongodb.com/try/download/community), se rodar a versão baixada no site do mongo não precisa criar o usuário de admin e se não mudou as configurações do mongo a string do URI de exemplo já está certa.
 
 Para rodar o projeto clone o repositorio e depois acesse ele e rode o seguinte comando
 ```
@@ -15,7 +15,7 @@ Eu recomendo rodar salvando a saída em algum arquivo de texto, execute o script
 node . >> log.txt
 ```
 
-Se der algum erro quando tiver buscando alguma issue você vai ter que fazer algumas modificações no código para pegar só o que deu erro, para isso comente as linhas do codigo que você já conseguiu buscar os dados, ou seja, essas linhas que salvam no banco de dados:
+Se der algum erro (menos o erro 404, esse significa que a issue foi deletada) quando tiver buscando alguma issue você vai ter que fazer algumas modificações no código para pegar só o que deu erro, para isso comente as linhas do codigo do que você já conseguiu buscar dos dados, ou seja, essas linhas que salvam no banco de dados:
 
 ```js
   await issuesCollection.insertOne({ issue_id, issue_data });
@@ -36,7 +36,7 @@ Se for varias issues em sequencia voce pode mudar o alcance do loop.
 Exemplo:
 Deu o seguinte erro no arquivo de log
 ```
-Got an error while fetching issue timeline 1337, message: getaddrinfo ENOTFOUND
+Got an error while fetching issue timeline 1337, message: erro de exemplo
 ```
 
 Você vai mudar o alcance do loop do for para pegar a issue 1337 e comentar as linhas que salvam no banco de dados da issues/comments/events/pull, uma vez que você só precisa dos dados da timeline
