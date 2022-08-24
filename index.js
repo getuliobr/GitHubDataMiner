@@ -35,7 +35,7 @@ console.log(`Total issue count: ${issueCount}`);
 
 const rateLimitPerRequestTimeout = 3600/4900;
 
-for(let i = 1; i <= issueCount; i++) {
+for(let i = 9019; i <= issueCount; i++) {
   console.log(`Fetching issue ${i} from ${REPO_OWNER}/${REPO_NAME}`);
   let issue_data, issue_id;
   try {
@@ -43,7 +43,7 @@ for(let i = 1; i <= issueCount; i++) {
     const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues/${i}`);
     issue_data = data;
     issue_id = data.id;
-    await issuesCollection.insertOne({ issue_id, issue_data });
+    await issuesCollection.updateOne({ issue_id }, { $set: { issue_id, issue_data }}, { upsert: true });
   } catch (error) {
     console.log(`Got an error while fetching issue ${i}, message: ${error.message}`);
     continue;
@@ -54,7 +54,7 @@ for(let i = 1; i <= issueCount; i++) {
   try {
     await sleep(rateLimitPerRequestTimeout);
     const { data: comments_data } = await api.get(comments_url);
-    await commentsCollection.insertOne({ issue_id, comments_data });
+    await commentsCollection.updateOne({ issue_id }, { $set: { issue_id, comments_data }}, { upsert: true });
   } catch (error) {
     console.log(`Got an error while fetching issue comments ${i}, message: ${error.message}`);
   }
@@ -62,7 +62,7 @@ for(let i = 1; i <= issueCount; i++) {
   try {
     await sleep(rateLimitPerRequestTimeout);
     const { data: events_data } = await api.get(events_url);
-    await eventsCollection.insertOne({ issue_id, events_data });
+    await eventsCollection.updateOne({ issue_id }, { $set: { issue_id, events_data }}, { upsert: true });
   } catch (error) {
     console.log(`Got an error while fetching issue events ${i}, message: ${error.message}`);
   }
@@ -70,7 +70,7 @@ for(let i = 1; i <= issueCount; i++) {
   try {
     await sleep(rateLimitPerRequestTimeout);
     const { data: timeline_data } = await api.get(timeline_url);
-    await timelineCollection.insertOne({ issue_id, timeline_data });
+    await timelineCollection.updateOne({ issue_id }, { $set: { issue_id, timeline_data }}, { upsert: true });
   } catch (error) {
     console.log(`Got an error while fetching issue timeline ${i}, message: ${error.message}`);
   }
@@ -82,7 +82,7 @@ for(let i = 1; i <= issueCount; i++) {
   try {
     await sleep(rateLimitPerRequestTimeout);
     const { data: pr_data } = await api.get(pull_url);
-    await pullCollection.insertOne({ issue_id, pr_data });
+    await pullCollection.updateOne({ issue_id }, { $set: { issue_id, pr_data }}, { upsert: true });
   } catch (error) {
     console.log(`Got an error while fetching pull request ${i}, message: ${error.message}`);
   }
