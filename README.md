@@ -24,17 +24,7 @@ node .
 
 ## Erros
 
-Se der algum erro (menos o erro 404, esse significa que a issue foi deletada) quando tiver buscando alguma issue você vai ter que fazer algumas modificações no código para pegar só o que deu erro, para isso comente as linhas do codigo do que você já conseguiu buscar dos dados, ou seja, essas linhas que salvam no banco de dados:
-
-```js
-  await issuesCollection.insertOne({ issue_id, issue_data });
-  await commentsCollection.insertOne({ issue_id, comments_data });
-  await eventsCollection.insertOne({ issue_id, events_data });
-  await timelineCollection.insertOne({ issue_id, timeline_data });
-  await pullCollection.insertOne({ issue_id, pr_data });
-```
-
-Edite no loop a issue que você precisa
+Se der algum erro (menos o erro 404, esse significa que a issue foi deletada) quando tiver buscando alguma issue você vai ter que fazer algumas modificações no código para pegar só o que deu erro, para isso edite no loop a issue que você precisa:
 
 ```js
 for(let i = ISSUE QUE DEU ERRO; i <= ISSUE QUE DEU ERRO; i++) {
