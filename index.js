@@ -35,7 +35,7 @@ console.log(`Total issue count: ${issueCount}`);
 
 const rateLimitPerRequestTimeout = 3600/4900;
 
-for(let i = 9019; i <= issueCount; i++) {
+for(let i = 0; i <= issueCount; i++) {
   console.log(`Fetching issue ${i} from ${REPO_OWNER}/${REPO_NAME}`);
   let issue_data, issue_id;
   try {
