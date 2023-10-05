@@ -7,6 +7,7 @@ const { GITHUB_TOKEN } = process.env;
 export default axios.create({
   baseURL: 'https://api.github.com/',
   headers: {
-    'Authorization': `token ${GITHUB_TOKEN}`,
+    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+    'X-GitHub-Api-Version': '2022-11-28'
   }
 });

@@ -1,9 +1,14 @@
 {
   "dependencies": {
     "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.0.1",
     "fs": "^0.0.1-security",
-    "mongo": "^0.1.0"
+    "graphql": "^16.8.1",
+    "jsdom": "^22.1.0",
+    "mongo": "^0.1.0",
+    "parse-git-patch": "^1.1.0",
+    "request": "^2.88.2"
   },
   "type": "module",
   "scripts": {

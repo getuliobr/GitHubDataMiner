@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import api from './api.js';
 import fs from 'fs/promises';
+import parse from 'parse-git-patch';
+const parseGitPatch = parse.default;
+
 import { MongoHelper } from './db.js'
 
 // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep?page=1&tab=scoredesc#tab-top
@@ -20,6 +23,7 @@ const commentsCollection = MongoHelper.getCollection('comments');
 const eventsCollection = MongoHelper.getCollection('events');
 const timelineCollection = MongoHelper.getCollection('timeline');
 const pullCollection = MongoHelper.getCollection('pullrequest');
+const filesCollection = MongoHelper.getCollection('modifiedfiles');
 
 const { data } = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
   'sort': 'created',
@@ -30,12 +34,18 @@ const { number: issueCount } = data[0];
 
 console.log(`Total issue count: ${issueCount}`);
 
+if(FETCH_PATCH === 'true') {
+  fs.mkdir(`./patch/${REPO_OWNER}/${REPO_NAME}/`, { recursive: true }, (err) => {
+    if (err) throw err;
+  });
+} 
+
 // TODO: calculate rate limit if unauthenticated
 // 5000 actual rate limit, 4900 just to make sure it works
 
 const rateLimitPerRequestTimeout = 3600/4900;
 
-for(let i = 0; i <= issueCount; i++) {
+for(let i = 10345; i <= issueCount; i++) {
   console.log(`Fetching issue ${i} from ${REPO_OWNER}/${REPO_NAME}`);
   let issue_data, issue_id;
   try {
@@ -92,7 +102,15 @@ for(let i = 0; i <= issueCount; i++) {
   try {
     await sleep(rateLimitPerRequestTimeout);
     const { data: patch_data } = await api.get(patch_url);
-    await fs.writeFile(`./patch/${issue_id}.patch`, patch_data, { flag: 'w+' });
+    await fs.writeFile(`./patch/${REPO_OWNER}/${REPO_NAME}/${issue_id}.patch`, patch_data, { flag: 'w+' });
+    const { files, ...parsedPatch } = parseGitPatch(patch_data);
+    const modifiedFiles = files.reduce((res, data) => {
+      if(!data.deleted) res.push(data.afterName);
+      return res;
+    }, []);
+
+    await filesCollection.updateOne({ issue_id }, { $set: { issue_id, modifiedFiles }}, { upsert: true });
+
   } catch (error) {
     console.log(`Got an error while fetching pull request ${i} patch, message: ${error.message}`);
   }
