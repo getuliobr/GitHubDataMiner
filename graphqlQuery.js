@@ -29,6 +29,33 @@ export const getLinkedPR = async (owner, name, number) => {
   }
 }
 
+export const SearchPR = async (owner, name, label, date='2000-01-01T00:00:00Z') => {
+  const query = `query {
+    search(query: "repo:${owner}/${name} is:pr created:>${date} sort:created-asc", type: ISSUE, first: 100) {
+      
+      edges {
+        node {
+          ... on PullRequest {
+            number
+            title
+            createdAt
+          }
+        }
+      }
+    }
+    rateLimit {
+      cost
+    }
+  }`
+
+  const { data } = await graphql(query);
+  try {
+    return data.data.search.edges;
+  } catch (error) {
+    console.log(error, data);
+  }
+}
+
 export const rateLimit = async () => {
   const query = `query {
     viewer {

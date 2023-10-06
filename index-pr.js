@@ -23,7 +23,7 @@ try {
 const pullCollection = MongoHelper.getCollection('reduced_pr');
 const firstCollection = MongoHelper.getCollection('firstcontribution');
 
-const SEARCH_RATE_LIMIT = 60/28; // it's 30 requests per minute, but we do 28 just to be safe
+const SEARCH_RATE_LIMIT = 60/29; // it's 30 requests per minute, but we do 28 just to be safe
 
 const paramPRPage = (date='2000-01-01T00:00:00Z') => ({
   'q': `repo:${REPO_OWNER}/${REPO_NAME} is:pr created:>${date}`,
@@ -41,8 +41,18 @@ const paramGFIPage = (date='2000-01-01T00:00:00Z') => ({
   'page': 1
 });
 
+const get = async (location, data) => {
+  try {
+    return await api.get(location, data);
+  } catch (error) {
+    console.log(`Got error ${error}, waiting ${SEARCH_RATE_LIMIT} before trying again`);
+    await sleep(SEARCH_RATE_LIMIT);
+    return await get(location, data);
+  }
+}
+
 const fetchGFI = async () => {
-  const { data } = await api.get(`/search/issues`, { params: paramGFIPage() });
+  const { data } = await get(`/search/issues`, { params: paramGFIPage() });
   const { total_count: issueCount, items: issueList } = data;
   console.log(`Total gfi count: ${issueCount}`);
 
@@ -52,7 +62,7 @@ const fetchGFI = async () => {
     const lastIssue = issueList[issueList.length - 1];
     const { created_at } = lastIssue;
 
-    const { data } = await api.get(`/search/issues`, { params: paramGFIPage(created_at) });
+    const { data } = await get(`/search/issues`, { params: paramGFIPage(created_at) });
     const { items } = data;
 
     issueList.push(...items);
@@ -66,8 +76,8 @@ const fetchGFI = async () => {
 
   for(let i = 1; i < issueList.length; i++) {
     if (issueList[i] < now) {
-      console.log('Somehow GFI fetch out of order')
-      break
+      console.log('Somehow GFI fetch out of order');
+      break;
     }
 
     now = new Date(issueList[i].created_at);
@@ -81,7 +91,7 @@ const fetchPR = async () => {
   const firstDate = new Date(issueList[0].created_at);
   const lastDate = new Date(issueList[issueList.length - 1].created_at);
 
-  const { data } = await api.get(`/search/issues`, { params: paramPRPage() });
+  const { data } = await get(`/search/issues`, { params: paramPRPage() });
   const { total_count: prCount, items: prList } = data;
   console.log(`Total pull count: ${prCount}`);
 
@@ -91,7 +101,7 @@ const fetchPR = async () => {
     const lastPR = prList[prList.length - 1];
     const { created_at } = lastPR;
 
-    const { data } = await api.get(`/search/issues`, { params: paramPRPage(created_at) });
+    const { data } = await get(`/search/issues`, { params: paramPRPage(created_at) });
     const { items } = data;
 
     prList.push(...items);
@@ -105,8 +115,8 @@ const fetchPR = async () => {
 
   for(let i = 0; i < prList.length; i++) {
     if (prList[i] < now) {
-      console.log('Somehow pull requests fetch out of order')
-      break
+      console.log('Somehow pull requests fetch out of order');
+      break;
     }
 
     now = new Date(prList[i].created_at);
@@ -153,5 +163,3 @@ const fetchPR = async () => {
 }
 
 await fetchPR();
-
-// await MongoHelper.disconnect();
